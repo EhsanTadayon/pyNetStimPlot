@@ -260,13 +260,13 @@ class BrainAestheticWidget(QWidget):
                 self.table.setItem(row_count,2, QTableWidgetItem(hemi))
 
                 # Add QPushButton to open color picker
-                color = "Pick Color"
-                color_btn = QPushButton('Pick Color')
+                color = "Pick"
+                color_btn = QPushButton('Pick')
                 color_btn.clicked.connect(lambda: self.open_color_dialog())
                 self.table.setCellWidget(row_count, 3, color_btn)
 
                 # Opacity
-                opacity = 1
+                opacity = "1"
                 self.table.setItem(row_count, 4, QTableWidgetItem(opacity))
                 
                 #Aesthetics
@@ -277,18 +277,18 @@ class BrainAestheticWidget(QWidget):
                 self.table.setItem(row_count, 5, aes_item)
         
                 # Show only Border
-                only_border = False
+                border = False
                 showedge_checkbox = QCheckBox(self)
                 self.table.setCellWidget(row_count, 6, showedge_checkbox)
                             
                 # Object
-                labelobj = LabelObj(label_path,label_name, hemi, color, opacity, only_border)
+                labelobj = LabelObj(label_path,label_name, hemi, color, opacity, border)
                 object_item = QTableWidgetItem("Label")
                 object_item.setData(Qt.UserRole, labelobj)
                 self.table.setItem(row_count, 0, object_item)
                 
                 # Properties
-                properties_btn = QPushButton("View Properties")
+                properties_btn = QPushButton("View")
                 properties_btn.clicked.connect(lambda _, row_count=row_count: self.show_object_properties(row_count))  # Pass row to slot
                 self.table.setCellWidget(row_count,7,properties_btn)
                 
@@ -303,12 +303,7 @@ class BrainAestheticWidget(QWidget):
         for annot_path in annot_paths:
             if annot_path:
                 self.table.insertRow(row_count)
-                
-                #Type
-                typename_item = QTableWidgetItem("Annot")
-                typename_item.setFlags(typename_item.flags() & ~Qt.ItemIsEditable)
-                self.table.setItem(row_count,0,typename_item)
-            
+                            
                 # Add QLineEdit for text input
                 annot_name = os.path.basename(annot_path)
                 annotname_item = QTableWidgetItem(annot_name)
@@ -330,7 +325,8 @@ class BrainAestheticWidget(QWidget):
 
                
                 # Opacity
-                self.table.setItem(row_count, 4, QTableWidgetItem("1"))
+                opacity = "1"
+                self.table.setItem(row_count, 4, QTableWidgetItem(opacity))
                 
                 #Aesthetics
                 aes_item = QTableWidgetItem("")
@@ -340,13 +336,20 @@ class BrainAestheticWidget(QWidget):
                 self.table.setItem(row_count, 5, aes_item)
         
                 # Show only Border
+                border = False
                 showedge_checkbox = QCheckBox(self)
                 self.table.setCellWidget(row_count, 6, showedge_checkbox)
                 
-                #path
-                path_item = QTableWidgetItem(annot_path)
-                self.table.setItem(row_count,7,path_item)
-
+                # Object
+                annotobj = AnnotObj(annot_path, annot_name, hemi, opacity, border)
+                object_item = QTableWidgetItem("Annot")
+                object_item.setData(Qt.UserRole, annotobj)
+                self.table.setItem(row_count, 0, object_item)
+                
+                # Properties
+                properties_btn = QPushButton("View")
+                properties_btn.clicked.connect(lambda _, row_count=row_count: self.show_object_properties(row_count))  # Pass row to slot
+                self.table.setCellWidget(row_count,7,properties_btn)
                 # Increase row count by 1
                 row_count+=1
         
@@ -359,13 +362,7 @@ class BrainAestheticWidget(QWidget):
             if surf_path:
                 self.table.insertRow(row_count)
                 
-                #Type
-                typename_item = QTableWidgetItem("Surf")
-                typename_item.setFlags(typename_item.flags() & ~Qt.ItemIsEditable)
-                self.table.setItem(row_count,0,typename_item)
-            
-                
-                # Add QLineEdit for text input
+                # name
                 surf_name = os.path.basename(surf_path)
                 surfname_item = QTableWidgetItem(surf_name)
                 surfname_item.setFlags(surfname_item.flags() & ~Qt.ItemIsEditable)
@@ -378,12 +375,15 @@ class BrainAestheticWidget(QWidget):
                 self.table.setItem(row_count,2, QTableWidgetItem(hemi))
 
                 # Color
-                color_btn = QPushButton('Pick Color')
+                color = "Pick"
+                color_btn = QPushButton('Pick')
                 color_btn.clicked.connect(lambda: self.open_color_dialog())
                 self.table.setCellWidget(row_count, 3, color_btn)
-               
+                
+            
                 # Opacity
-                self.table.setItem(row_count, 4, QTableWidgetItem("1"))
+                opacity = "1"
+                self.table.setItem(row_count, 4, QTableWidgetItem(opacity))
                 
                 #Aesthetics
                 aes_item = QComboBox(self)
@@ -397,10 +397,17 @@ class BrainAestheticWidget(QWidget):
                 empty_item.setBackground(self.palette().color(QPalette.Window))
                 self.table.setItem(row_count, 6, empty_item)
                 
+
+                # Object
+                surfobj = SurfObj(surf_path, surf_name, hemi, color, aes_item.currentText(), opacity)
+                object_item = QTableWidgetItem("Surf")
+                object_item.setData(Qt.UserRole, surfobj)
+                self.table.setItem(row_count, 0, object_item)
                 
-                # path
-                path_item = QTableWidgetItem(surf_path)
-                self.table.setItem(row_count,7,path_item)
+                # Properties
+                properties_btn = QPushButton("View")
+                properties_btn.clicked.connect(lambda _, row_count=row_count: self.show_object_properties(row_count))  # Pass row to slot
+                self.table.setCellWidget(row_count,7,properties_btn)
                 
                 # Increase row count by 1
                 row_count+=1
@@ -463,7 +470,7 @@ class BrainAestheticWidget(QWidget):
                 color_btn.setText(color.name())  # Display the selected color code on the button
                 self.table.setCellWidget(row_count, 3, color_btn)
             else:
-                color_btn = QPushButton("Pick Color")
+                color_btn = QPushButton("Pick")
                 color_btn.clicked.connect(lambda: self.open_color_dialog())
                 self.table.setCellWidget(row_count, 3, color_btn)
                        
@@ -523,11 +530,6 @@ class BrainAestheticWidget(QWidget):
             # Check if any row is selected
             if selected_row >= 0:
                 self.table.removeRow(selected_row)
-                # del self.aes_paths['row_{row}'.format(row=selected_row+1)]
-                # for row in range(selected_row+1,row_count):
-                #     rowp1 = row+1
-                #     self.aes_paths[f'row_{row}'] = self.aes_paths[f'row_{rowp1}']
-                # del self.aes_paths[f'row_{row_count}']
                      
             else:
                 # If no row is selected, show an error message
@@ -583,14 +585,32 @@ class BrainAestheticWidget(QWidget):
             self.table.cellWidget(row,5).setCurrentText(obj.aesthetic)
             
         #Only border
-        if hasattr(obj,'only_border'):
-            if obj.only_border=='False':
-                only_border=False
-            elif obj.only_border=='True':
+        if hasattr(obj,'border'):
+            if obj.border=='False':
+                border=False
+            elif obj.border=='True':
                 only_boder=True
-            self.table.cellWidget(row,6).setChecked(only_border)
+            self.table.cellWidget(row,6).setChecked(border)
         
 
+    
+    def update_obj_properties(self,row):
+        item = self.table.item(row,0)
+        custom_obj = item.data(Qt.UserRole)
+        
+        if hasattr(custom_obj,'hemi'):
+            custom_obj.hemi = self.table.item(row,2).text()
+        if hasattr(custom_obj,'color'):
+            custom_obj.color = self.table.cellWidget(row,3).text()
+        if hasattr(custom_obj,'opacity'):
+            custom_obj.opacity = float(self.table.item(row,4).text())
+        if hasattr(custom_obj,'aesthetic'):
+            custom_obj.aesthetic = self.table.cellWidget(row,5).currentText()
+        if hasattr(custom_obj,'border'):
+            custom_obj.border = self.table.cellWidget(row,6).isChecked()
+            
+        return custom_obj
+    
     
     def read_table_data(self):
         row_data = {}
@@ -603,15 +623,14 @@ class BrainAestheticWidget(QWidget):
         row_count = self.table.rowCount()
         
         for row in range(row_count):
-            item = self.table.item(row,0)
-            obj = item.data(Qt.UserRole)
+            obj = self.update_obj_properties(row)
             
             if isinstance(obj,LabelObj):
                 row_data["Label"].append(obj)
-            elif isinstance(obj,AnnotObj)=='Annot':
+            elif isinstance(obj,AnnotObj):
                 row_data["Annot"].append(obj)
-            # elif itemtype.text()=="Surf":
-           #      row_data["Surf"].append()
+            elif isinstance(obj,SurfObj):
+                row_data["Surf"].append(obj)
             elif isinstance(obj,FociObj):
                 row_data["Foci"].append(obj)
             
@@ -620,21 +639,31 @@ class BrainAestheticWidget(QWidget):
             
             
 class LabelObj(object):
-    def __init__(self, path, name, hemi, color, opacity, only_border):
+    def __init__(self, path, name, hemi, color, opacity, border):
         self.path = path
         self.name = name
         self.hemi = hemi
         self.color = color
         self.opacity = float(opacity)
-        self.only_border = only_border  
+        self.border = border  
         
 class AnnotObj(object):
-    def __init__(self, path, name, hemi, opacity, only_border):
+    def __init__(self, path, name, hemi, opacity, border):
         self.path = path
         self.name = name
         self.hemi = hemi
-        self.opacity = opacity
-        self.only_border = only_border
+        self.opacity = float(opacity)
+        self.border = border
+        
+        
+class SurfObj(object):
+    def __init__(self, path, name, hemi, color, aesthetic, opacity):
+        self.path = path
+        self.name = name
+        self.hemi = hemi
+        self.color = color
+        self.aesthetic = aesthetic
+        self.opacity = float(opacity)
         
 class FociObj(object):
     def __init__(self, coords, name, hemi, map_surface, scale_factor, color, opacity):
@@ -651,7 +680,7 @@ class FociObj(object):
 class ObjectPropertiesDialog(QDialog):
     def __init__(self, custom_obj):
         super().__init__()
-        self.setWindowTitle("Object Properties")
+        self.setWindowTitle("Properties")
         self.custom_obj = custom_obj
 
         # get properties

@@ -12,7 +12,9 @@ from traitsui.api import View, Item
 from mayavi.core.ui.api import MayaviScene, MlabSceneModel, SceneEditor
 from surfer import Brain
 from brainconfig import BrainConfigWidget
-
+import nibabel as nib
+from mayavi import mlab
+from PIL import ImageColor
 
 class PlotWindowUI(QMainWindow):
     def __init__(self):
@@ -139,12 +141,11 @@ class BrainVisualization(HasTraits):
             #### add aesthetics
             # add label
             for label in self.aesthetics['Label']:
-                print('opacity:', label.opacity)
                 self.brain.add_label(label=label.path,
                                      color=label.color,
                                      alpha=label.opacity,
                                      hemi=label.hemi,
-                                     borders=label.only_border)
+                                     borders=label.border)
                                      
             
             #### add aesthetics
@@ -152,10 +153,19 @@ class BrainVisualization(HasTraits):
             
             for annot in self.aesthetics['Annot']:
                 self.brain.add_annotation(annot=annot.path,
-                                        borders=annot.only_border,
+                                        borders=annot.border,
                                         alpha=annot.opacity, 
                                         hemi=annot.hemi,
                                         )
+                                        
+            for surf in self.aesthetics['Surf']:
+                 surf_geom = nib.freesurfer.io.read_geometry(surf.path)
+                 vertices, faces = surf_geom[0],surf_geom[1]
+                 color = ImageColor.getcolor(surf.color,"RGB")
+                 color = (color[0]/255.0,color[1]/255.0,color[2]/255.0)
+                 mlab.triangular_mesh(vertices[:,0],vertices[:,1],vertices[:,2],faces,representation=surf.aesthetic,color=color,opacity=surf.opacity)
+                 
+                
                                         
                                         
             #### add foci
