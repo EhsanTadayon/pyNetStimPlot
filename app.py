@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QFrame, QVBoxLayout, QHBoxLayout,
     QPushButton, QComboBox, QMenuBar, QLineEdit, QAction, QWidget, QFileDialog, QMessageBox, QDialog
@@ -134,9 +135,9 @@ class BrainVisualization(HasTraits):
     def plot_brain(self):
         # Plot the PySurfer brain only when this method is called
         if self.brain is None and self.doplot is True:
-            self.brain = Brain(subject_id=self.subject_id, hemi=self.hemi,
-             surf=self.surf, figure=self.scene.mayavi_scene, background=self.background,
-             subjects_dir=self.subjects_dir, alpha=self.alpha)
+            self.brain = Brain(subject_id='freesurfer', hemi=self.hemi,
+                surf=self.surf, figure=self.scene.mayavi_scene, background=self.background,
+                subjects_dir=os.path.join(self.project_dir,self.subject_id), alpha=self.alpha)
               
             #### add aesthetics
             # add label
@@ -148,16 +149,18 @@ class BrainVisualization(HasTraits):
                                      borders=label.border)
                                      
             
-            #### add aesthetics
             # add annot
             
             for annot in self.aesthetics['Annot']:
                 self.brain.add_annotation(annot=annot.path,
                                         borders=annot.border,
-                                        alpha=annot.opacity, 
+                                        alpha=annot.opacity,
                                         hemi=annot.hemi,
+                                        remove_existing=False,
                                         )
-                                        
+
+            
+            # add surf                          
             for surf in self.aesthetics['Surf']:
                  surf_geom = nib.freesurfer.io.read_geometry(surf.path)
                  vertices, faces = surf_geom[0],surf_geom[1]
@@ -165,13 +168,17 @@ class BrainVisualization(HasTraits):
                  color = (color[0]/255.0,color[1]/255.0,color[2]/255.0)
                  mlab.triangular_mesh(vertices[:,0],vertices[:,1],vertices[:,2],faces,representation=surf.aesthetic,color=color,opacity=surf.opacity)
                  
-                
-                                        
-                                        
-            #### add foci
+
             # add foci
-          #  for 
+            for foci in self.aesthetics['Foci']:
+                coords = [float(foci.x),float(foci.y),float(foci.z)]
+                alpha = float(foci.opacity)
+                scale_factor = float(foci.scale_factor)
                 
+                map_surface = None if foci.map_surface=="" else foci.map_surface
+                self.brain.add_foci(coords, map_surface=map_surface,scale_factor=scale_factor,
+                                    color=foci.color, alpha=alpha, name=foci.name, hemi=foci.hemi)
+                                    
                                      
                                      
             
@@ -180,7 +187,7 @@ class BrainVisualization(HasTraits):
     def update_brain_config(self,plotconfig):
 
         self.subject_id = plotconfig['subject_id']
-        self.subjects_dir=plotconfig['subjects_dir']
+        self.project_dir=plotconfig['project_dir']
         self.hemi = plotconfig['hemi']
         self.surf = plotconfig['surf']
         self.cortex = plotconfig['cortex']
