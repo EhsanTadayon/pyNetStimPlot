@@ -3,3 +3,4 @@ A python-based Graphical User Interface (GUI) for visualization of various aesth
 
 
 ![main](./docs/main.jpg)
+![main2](./docs/main2.jpg)
